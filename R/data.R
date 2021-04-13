@@ -1,8 +1,8 @@
 #' Simulated N-of-1 study data with 300 patients
 #'
-#' The dataset containing exposure and outcome of around 300 patients over time.
+#' The data set containing exposure and outcome of around 300 patients over time.
 #'
-#' @format A data frame with 42000 rows and 12 variables:
+#' @format A data frame with 33600 rows and 7 variables:
 #' \describe{
 #'   \item{X}{row id}
 #'   \item{date}{date of observation}
@@ -12,6 +12,7 @@
 #'   \item{Uncertain_Low_back_Pain}{Observation of uncertain low back pain (outcome) on a scale of 0 to 15}
 #' }
 #' @source Simulate Data with \url{https://github.com/thogaertner/n-of-1-simulation}
+#' @export
 "simpatdat"
 
 

@@ -1,11 +1,20 @@
-Package: nofone
+Package: cinof1
 Type: Package
-Title: What the Package Does (Title Case)
+Title: Analyse causal inferences in N-of-1 studies
 Version: 0.1.0
-Author: Who wrote it
-Maintainer: The package maintainer <yourself@somewhere.net>
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
-License: What license is it under?
+Authors@R: person("Thomas","Gaetner",email="thomas.gaertner@student.hpi.de", role = c("aut", "cre"))
+Description: This package provides functions for analysing causal inferences in N-of-1 studies. 
+    It contains an API to DAGs, bayesian networks and so on.
 Encoding: UTF-8
 LazyData: true
+License: MIT
+RoxygenNote: 7.1.1
+Imports: 
+    bnlearn,
+    dagitty,
+    geepack,
+    psych
+Suggests: 
+    ggdag
+Depends: 
+    R (>= 2.10)

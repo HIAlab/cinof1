@@ -1,0 +1,55 @@
+---
+title: "Example_Use"
+author: "Thomas Gaertner"
+date: "4/13/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Introduction
+
+This R Markdown document shows the usage of the package 'cino1'. 
+
+```{r}
+library(cinof1)
+```
+
+
+## Data
+
+In this package, a sample data frame is included. It contains data for 300 patients within an n of 1 study. The data has the following structure:
+
+* patient_id
+* date`
+* day
+* Block
+* Activity
+* treatment
+* Uncertain_Low_Back_Pain
+
+```{r data}
+load("data/simpatdat.rda")
+summary(simpatdat)
+```
+
+## Basic Analysis
+
+Basic functions for analyse N-of-1 studys are for example wilcox test or comparative plots. These two functions are provided in this package.
+
+```{r basic functions}
+outcome <- "Uncertain_Low_Back_Pain"
+exposure <- "treatment"
+comparative_plot(simpatdat, exposure = exposure, outcome = outcome)
+wilcox.nofone(simpatdat, exposure = exposure, outcome = outcome)
+```
+## G-Estimation
+
+```{r g-estimation}
+outcome <- "Uncertain_Low_Back_Pain"
+exposure <- "treatment"
+comparative_plot(simpatdat, exposure = exposure, outcome = outcome)
+wilcox.nofone(simpatdat, exposure = exposure, outcome = outcome)
+```
