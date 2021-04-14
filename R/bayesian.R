@@ -17,14 +17,15 @@
 bn.prep.dag <- function(dag){
   exposure <- exposures(dag)
   outcome <- outcomes(dag)
-  bn.dag <- empty.graph(nodes = names(dag))
+  names <- names(dag)
+  bn.dag <- bnlearn::empty.graph(nodes = names(dag))
   edges <- edges(dag)
   edges$from <- edges$v
   edges$to <- edges$w
   edges[] <- lapply(edges,as.character)
-  arcs(bn.dag) = edges[,c("from","to")]
+  bnlearn::arcs(bn.dag) = edges[,c("from","to")]
   plot(bn.dag, main = "Transformed Bn DAG")
-  return(list(dag = bn.dag, exposure = exposure, outcome = outcome))
+  return(list(dag = bn.dag, exposure = exposure, outcome = outcome, variables=names))
 }
 
 
@@ -38,12 +39,53 @@ bn.prep.dag <- function(dag){
 #' load(simpatdag)
 #' bn.prep.dag(simpatdag)
 #' @export
-fit.bn.dag <- function(dag, data, method){
-  if(missing(method)){
-    method <- "bayes"
-  }
-  fit <- bn.fit(dag$dag, data, method = method)
+bn.fit.dag <- function(data, dag, method = "bayes"){
+  fit <- bnlearn::bn.fit(dag$dag, data, method = method)
   return(fit)
 }
 
+
+#' Preprocess data
+#' @description This function preprocesses a dataframe to be used for bn.fit
+#' @param dag result from bn.prep.dag
+#' @param data R data frame to fit the Bayesian network
+#' @param id column name of patient identifier (only needed when lag column)
+#' @param time_col column name of time (integer expected, only needed when lag column)
+#' @return data frame
+#' @examples
+#' load(simpatdag)
+#' bn.prep.dag(simpatdag)
+#' @export
+bn.prep.data <- function(dag, data, id="patient_id", time_col="day"){
+  # get relevant columns
+  names <- dag$variables
+  # calculate lag
+  for(name in names){
+    # test, if lag is included
+    if(grepl(".lag_", name, fixed=TRUE)){
+      # extract lag and col information
+      res <- stringr::str_split(name, ".lag_", n = 2, simplify = TRUE)
+      var_name <- res[1]
+      lag <- as.numeric(res[2])
+      # creat lag column
+      data[,name] <- data[,var_name]
+      for(row in c(1:nrow(data))){
+        data_point <- data[data[,id] == data[row,id] & data[,time_col] == data[row,time_col]-lag,]
+        if (!nrow(data_point)==0){
+          data[row,name] <- data_point[1,var_name]
+        }else{
+          data[row,name] <- NA
+        }
+      }
+      if(lapply(simpatdat, class)[[var_name]]=="factor"){
+        data[,name] <- as.factor(data[,name])
+        levels(data[,name]) <- levels(data[,var_name])
+      }
+    }
+  }
+  # filter column names
+  data <- data[,names]
+  # return dataframe
+  return(data)
+}
 

@@ -16,7 +16,8 @@ find_optimum_rec(
   lower_bound_beta,
   number_it,
   max_number_it,
-  epsilon
+  epsilon,
+  method
 )
 }
 \description{

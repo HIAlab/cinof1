@@ -10,11 +10,30 @@ nofgest(
   exposure,
   confounder,
   id,
-  upper_bound_psi,
-  lower_bound_psi,
-  max_number_it
+  method = "iterate",
+  upper_bound_psi = 2,
+  lower_bound_psi = -2,
+  max_number_it = NULL,
+  steps = 10
 )
+}
+\arguments{
+\item{data}{data frame}
+
+\item{outcome}{outcome variable name}
+
+\item{exposure}{exposure variable name}
+
+\item{confounder}{list of confounders}
+
+\item{id}{patient id}
+
+\item{max_number_it}{max umber of iterations}
 }
 \description{
 This function use standard IV estimator via additive marginal structural models to analyse a treatment effect
+}
+\examples{
+load(simpatdat)
+nofgest()
 }
