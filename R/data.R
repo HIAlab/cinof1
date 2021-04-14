@@ -16,3 +16,9 @@
 "simpatdat"
 
 
+#' Dag
+#'
+#' This is an example dag for the data.
+#'
+#' @export
+"ex.dag"
