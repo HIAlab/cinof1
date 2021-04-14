@@ -11,8 +11,9 @@
 #' @param exposure defines the exposure variable
 #' @param outcome defines the outcome variable
 #' @examples
-#' comparative_plot(data)
-comparative_plot <- function(data, exposure, outcome){
+#' comparative.plot(data)
+#' @export
+comparative.plot <- function(data, exposure, outcome){
   # Create Formula
   str_formula <- sprintf("%s ~ %s", outcome, exposure)
   # plot results
@@ -25,10 +26,10 @@ comparative_plot <- function(data, exposure, outcome){
 #' @param exposure identifies the column of exposure variable
 #' @param outcome identifies the column of outccome variable
 #' @example
-#' load("data/simpatdat.RData")
-#' wilcox.nofone(simpatdat, "Treatment_1", "Uncertain_Low_Back_Pain)
+#' wilcox.nofone(simpatdat, "treatment", "Uncertain_Low_Back_Pain)
 #' @references``
 #' This function uses the method wilcox.test from stats package. Run '?wilcox.test' for more information.
+#' @export
 wilcox.nofone <- function(data, exposure, outcome){
   # Create Formula
   str_formula <- sprintf("%s ~ %s", outcome, exposure)

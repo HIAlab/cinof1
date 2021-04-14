@@ -10,3 +10,10 @@ prep.onehot <- function(data, var){
   newdata <- data.frame(predict(dummy, newdata = data_frame))
   return(list(data = cbind(data, newdata), names = colnames(newdata)))
 }
+
+
+prep.normalize <- function(data){
+  return((data-mean(data))/sd(data))
+}
+
+?sd
