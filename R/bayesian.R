@@ -15,11 +15,11 @@
 #' bn.prep.dag(simpatdag)
 #' @export
 bn.prep.dag <- function(dag){
-  exposure <- exposures(dag)
-  outcome <- outcomes(dag)
+  exposure <- dagitty::exposures(dag)
+  outcome <- dagitty::outcomes(dag)
   names <- names(dag)
   bn.dag <- bnlearn::empty.graph(nodes = names(dag))
-  edges <- edges(dag)
+  edges <- dagitty::edges(dag)
   edges$from <- edges$v
   edges$to <- edges$w
   edges[] <- lapply(edges,as.character)

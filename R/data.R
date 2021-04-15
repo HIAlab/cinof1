@@ -12,7 +12,7 @@
 #'   \item{Uncertain_Low_back_Pain}{Observation of uncertain low back pain (outcome) on a scale of 0 to 15}
 #' }
 #' @source Simulate Data with \url{https://github.com/thogaertner/n-of-1-simulation}
-#' @export
+#' @export simpatdat
 "simpatdat"
 
 
@@ -20,5 +20,8 @@
 #'
 #' This is an example dag for the data.
 #'
-#' @export
-"ex.dag"
+#' @format A dagitty string with an example dag for simpatdat
+#'
+#' @source Example for simpatdat
+#' @export simpatdag
+"simpatdag"

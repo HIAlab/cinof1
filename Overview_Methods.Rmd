@@ -40,9 +40,13 @@ load("data/simpatdat.rda")
 summary(simpatdat)
 ```
 
-## Basic Analysis
+## Basic Functions
 
 Basic functions for analyse N-of-1 studys are for example wilcox test or comparative plots. These two functions are provided in this package.
+
+### Comparative Plot
+
+To get a first idea about the data and the difference between treatment 1 and treatment 2, a comparative plot could be used. It shows the outcome on the y-Axis against the different treatments on the x-Axis,
 
 ```{r basic function comparativ plot}
 # Define outcome and exposure column
@@ -51,6 +55,11 @@ exposure <- "treatment"
 # Plot outcome among different exposures
 comparative.plot(simpatdat, exposure = exposure, outcome = outcome)
 ```
+
+
+## Wilcox Test
+
+To validate, that there is a difference in both treatments, the Wilcox test could be used. It calculates the p-value for the null hypothesis, that there location shift is equal to zero.
 
 ```{r basic function wilcox testt}
 # Define outcome and exposure column
@@ -62,45 +71,63 @@ wilcox.nofone(simpatdat, exposure = exposure, outcome = outcome)
 
 ## Bayesian
 
-### Dag
-```{r}
+Bayesian Networks are used to calculated the probability of outcome variables adjusted for confounders. For that, a dag is required, which identifies the relations between the variables.
+In this implementation, also lags are included and could be specified in the dag by adding `.lag=` to the variable name.
+
+###  Preprocess Data
+```{r bn.data}
+# specify column names
 id <- "patient_id"
 time_col <- "day"
 
-ex.dag <- dagitty("dag{treatment.lag_1 -> Activity.lag_1 -> Uncertain_Low_Back_Pain; treatment -> Uncertain_Low_Back_Pain}")
-#usethis::use_data(ex.dag, internal=FALSE, overwrite = TRUE)
-#plot(ex.dag)
-
-#load("data/ex.dag.rda")
+# Load data
+load("data/simpatdag.rda")
 load("data/simpatdat.rda")
 
-# Data Preprocessing
-simpatdat <- simpatdat[simpatdat$patient_id>290,]
+plot(simpatdag)
+
+# Dag preprocessing
+bn.dag <- bn.prep.dag(simpatdag)
+
+# Data Preprocessing (Factorization)
 simpatdat$Uncertain_Low_Back_Pain <- as.factor(simpatdat$Uncertain_Low_Back_Pain)
 simpatdat$Activity <- cut(simpatdat$Activity, 3, labels=c("low Activity", "middle Activity", "high Activity"))
-
-bn.dag <- bn.prep.dag(ex.dag)
-
 bn.data <- bn.prep.data(bn.dag, simpatdat, id, time_col)
 bn.data <- na.omit(bn.data)
+```
+
+
+### Fit and Plot Results
+```{r bn.fit}
 fitted.bn <- bn.fit.dag(bn.data, bn.dag, method="bayes")
-fitted.bn <- bn.fit(bn.dag$dag, bn.data, method = "mle")
+
+library(bnlearn)
 bn.fit.barchart(fitted.bn$Uncertain_Low_Back_Pain)
 ```
+
+
 ## G-Estimation
 
-```{r g-estimation}
-data <- simpatdat[simpatdat$patient_id>195,]
-data <- data[data$patient_id<205,]
+G-Estimation is used to adjust the analysis for causal inferences. For that, three different methods are implemented
+
+### Load Data
+```{r g.est load data}
+load("data/simpatdat.rda")
+```
+
+
+### Fit G-Estimation by Iteration
+It iterates over several values for $\psi$ and returns a dataframe with $\psi$ and corresponding $\alpha$
+```{r g.est method.iter}
 outcome <- "Uncertain_Low_Back_Pain"
 exposure <- "treatment"
 confounder <- c("Activity")
 id <- "patient_id"
-df <- nofgest(data, outcome, exposure, confounder, id, method="iterate", steps=100, upper_bound_psi = 10, lower_bound_psi = -10)
+df <- nofgest(simpatdat, outcome, exposure, confounder, id, method="iterate", steps=100, upper_bound_psi = 10, lower_bound_psi = -10)
 ```
 
-
-```{r}
+This function is useful to plot a curve for $\alpha$ and $\psi$.
+```{r g.est method.iter plot}
 plot(df , type="l", main=expression(paste("Plot of ", alpha, "( ", psi,")")),
         xlab=expression(psi),
         ylab=expression(alpha))
@@ -108,52 +135,24 @@ plot(df , type="l", main=expression(paste("Plot of ", alpha, "( ", psi,")")),
 lines( c(-100,100),c(0,0), type = "l", col = "red")
 ```
 
+### Fit G-Estimation by Recursive Mean
 
-```{r}
-
-data <- simpatdat[simpatdat$patient_id>195,]
-data <- data[data$patient_id<205,]
+This function approximate $\psi$ by an interval search.
+```{r g.est method.rec_mean}
 outcome <- "Uncertain_Low_Back_Pain"
 exposure <- "treatment"
 confounder <- c("Activity")
 id <- "patient_id"
-nofgest(data, outcome, exposure, confounder, id, method="rec_mean", new_psi)
+nofgest(simpatdat, outcome, exposure, confounder, id, method="rec_mean")
 ```
 
-```{r}
-data <- simpatdat[simpatdat$patient_id>195,]
-data <- data[data$patient_id<205,]
+### Fit G-Estimation by Recursive Improved
+
+This function approximate $\psi$ by an optimized interval search.
+```{r g.est method.rec_lin}
 outcome <- "Uncertain_Low_Back_Pain"
 exposure <- "treatment"
 confounder <- c("Activity")
 id <- "patient_id"
-nofgest(data, outcome, exposure, confounder, id, method="rec", new_psi)
+nofgest(simpatdat, outcome, exposure, confounder, id, method="rec")
 ```
-```{r}
-it_mean <- 0 
-for(i in c(1,2,4,6)){
-  for(shift in seq(from=-i+(1/2*i), to=i-(1/2*i),length.out=10)){
-    res <- nofgest(data, outcome, exposure, confounder, id, method="rec", upper_bound_psi = i-shift, lower_bound_psi = -i-shift)
-    it_mean <- it_mean + res$n_it
-  }
-  print(paste("Mean it for i=",i,": ",it_mean/10))
-  it_mean <- 0
-}
-```
-
-```{r}
-it_mean <- 0 
-for(i in c(1,2,4,6)){
-  for(shift in seq(from=-i+(1/2*i), to=i-(1/2*i),length.out=10)){
-    res <- nofgest(data, outcome, exposure, confounder, id, method="rec_mean", upper_bound_psi = i-shift, lower_bound_psi = -i-shift)
-    it_mean <- it_mean + res$n_it
-  }
-  print(paste("Mean it for i=",i,": ",it_mean/10))
-  it_mean <- 0
-}
-```
-```{r}
-
-
-```
-

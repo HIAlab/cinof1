@@ -26,6 +26,7 @@ comparative.plot <- function(data, exposure, outcome){
 #' @param exposure identifies the column of exposure variable
 #' @param outcome identifies the column of outccome variable
 #' @example
+#' load(simpatdat)
 #' wilcox.nofone(simpatdat, "treatment", "Uncertain_Low_Back_Pain)
 #' @references``
 #' This function uses the method wilcox.test from stats package. Run '?wilcox.test' for more information.
