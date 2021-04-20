@@ -69,6 +69,22 @@ exposure <- "treatment"
 wilcox.nofone(simpatdat, exposure = exposure, outcome = outcome)
 ```
 
+## Adjust Wash In and Wash Out
+
+
+```{r}
+outcome <- "Uncertain_Low_Back_Pain"
+exposure <- "treatment"
+variables <- c("Activity")
+id <- "patient_id"
+time_col <- "day"
+
+result <- estimate_gamma_tau(data = simpatdat, outcome = outcome, exposure = exposure, variables = variables, bound = 3, symmetric = TRUE, id=id, time_col = time_col)
+fit.adj.lm(data = simpatdat, outcome = outcome, exposure = exposure, variables = variables, effects = result$best, id = id, time_col = time_col)
+```
+
+
+
 ## Bayesian
 
 Bayesian Networks are used to calculated the probability of outcome variables adjusted for confounders. For that, a dag is required, which identifies the relations between the variables.

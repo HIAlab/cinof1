@@ -5,15 +5,19 @@
 ##############################################################
 
 prep.onehot <- function(data, var){
-  data_frame <- data[var]
-  dummy <- dummyVars(" ~ .", data=data_frame)
-  newdata <- data.frame(predict(dummy, newdata = data_frame))
-  return(list(data = cbind(data, newdata), names = colnames(newdata)))
+  data[,var] <- as.factor(data[,var])
+  levels <- levels(data[,var])
+  new_variables <- c()
+
+  for(i in c(1:length(levels))){
+    data[,paste(var, levels[i], sep=".")] <- ifelse(data[,var]==levels[i], 1,0)
+    new_variables[i] <- paste(var, levels[i], sep=".")
+  }
+
+  return(list(data = data, names = new_variables))
 }
 
 
 prep.normalize <- function(data){
   return((data-mean(data))/sd(data))
 }
-
-?sd

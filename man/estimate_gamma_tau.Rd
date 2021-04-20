@@ -5,14 +5,20 @@
 \title{Estimate Gamma and Tau}
 \usage{
 estimate_gamma_tau(
-  patients_data,
+  data,
   outcome,
   exposure,
+  variables,
   bound = 10,
-  symmetric = TRUE
+  symmetric = TRUE,
+  id = "id",
+  time_col = "day",
+  one.hot = FALSE
 )
 }
 \arguments{
+\item{data}{a data frame holding treatment variables and outcome.}
+
 \item{outcome}{defines the outcome column}
 
 \item{exposure}{defines the exposure variable (level)}
@@ -20,18 +26,24 @@ estimate_gamma_tau(
 \item{bound}{maximum value for gamma and tau}
 
 \item{symmetric}{identifies if wash-in effect is equal to wash-out effect}
-
-\item{data}{a data frame holding treatment variables and outcome.}
 }
 \value{
 a vector with best gamma and tau.
 }
 \description{
 This function analyzes a patient with time varying treatment.
-It analyzes the patient with several wash-in and wash-out effects and returns the best gamma and tau.
+It analyzes the patient with several wash-in and wash-out effects and returns the best gamma and tau. It is implemented for 2 different treatments.
 }
 \examples{
-load(simpatdat)
-bound <- 5
-estimate_gamma_tau(patient, "Uncertain_Low_Back_Pain", exposure = "treatment")
+# Define Variables
+outcome <- "Uncertain_Low_Back_Pain"
+exposure <- "treatment"
+variables <- c("Activity")
+id <- "patient_id"
+time_col <- "day"
+# Estimate best gamma and tau
+result <- estimate_gamma_tau(data = simpatdat, outcome = outcome, exposure = exposure, variables = variables, bound = 3, symmetric = TRUE, id=id, time_col = time_col)
+# Fit Linear Model
+fit.adj.lm(data = simpatdat, outcome = outcome, exposure = exposure, variables = variables, effects = result$best, id = id, time_col = time_col)
+
 }

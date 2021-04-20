@@ -4,14 +4,14 @@
 \alias{gen_treatment_effect}
 \title{Generate Treatment Effect}
 \usage{
-gen_treatment_effect(treatment, gamma = 1, tau = 1)
+gen_treatment_effect(data, exposure, gamma, tau, id, time_col)
 }
 \arguments{
-\item{treatment}{vector of 1 (treated) and 0 (not treated)}
-
 \item{gamma}{wash-in effect (default 1)}
 
 \item{tau}{wash-out effect (default 1)}
+
+\item{treatment}{vector of 1 (treated) and 0 (not treated)}
 }
 \value{
 vector with expected treatment effect

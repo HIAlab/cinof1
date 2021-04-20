@@ -10,14 +10,43 @@
 #' @param data defines a data frame.
 #' @param exposure defines the exposure variable
 #' @param outcome defines the outcome variable
+#' @param method one of boxplot (default) or denseplot
+#' @param adjustment adjust parameter for ggplot2::geom_density
+#' @param title title string for plot
 #' @examples
 #' comparative.plot(data)
 #' @export
-comparative.plot <- function(data, exposure, outcome){
-  # Create Formula
-  str_formula <- sprintf("%s ~ %s", outcome, exposure)
+comparative.plot <- function(data, exposure, outcome, method="boxplot", adjustment=3, title = "Comparative Plot"){
   # plot results
-  boxplot(as.formula(str_formula), data=simpatdat)
+
+  # Create mean
+  labels <- levels(data[,exposure])
+
+  mu <- data.frame(row.names = c(1:length(labels)))
+  mu[,exposure] <- labels
+  mu[,"mean"] <- rep(NA, length(labels))
+
+
+  for(i in c(1:length(labels))){
+    mu[i,"mean"] <- (mean(data[data[,exposure]==labels[i],outcome]))
+  }
+
+
+  if(method=="denseplot"){
+    p <- ggplot2::ggplot(data=data, mapping=ggplot2::aes_string(x=outcome, color = exposure , fill=exposure)) +
+      ggplot2::geom_density( color="#e9ecef", alpha=0.6, position = 'identity', adjust = adjustment ) +
+      ggplot2::labs(fill="") +
+      ggplot2::ggtitle(label=title, subtitle = paste("Mean difference: ", round(abs(mu[1,"mean"]-mu[2,"mean"]), digits = 3))) +
+      ggplot2::geom_vline(data=mu, ggplot2::aes(xintercept=mean),
+                 linetype="dashed") +
+      ggplot2::scale_color_brewer(palette="Dark2")
+    return(p)
+  }else{
+    p<-ggplot2::ggplot(data=data, mapping=ggplot2::aes_string(x=exposure, y=outcome, color=outcome)) +
+      ggplot2::geom_boxplot() +
+      ggplot2::ggtitle(label=title, subtitle = paste("Mean difference: ", round(abs(mu[1,"mean"]-mu[2,"mean"]), digits = 3)))
+    return(p)
+  }
 }
 
 #' Wilcox test

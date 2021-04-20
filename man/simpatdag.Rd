@@ -6,9 +6,12 @@
 \title{Dag}
 \format{
 A dagitty string with an example dag for simpatdat
+\describe{
+  \item{Dag}{dag}
+}
 }
 \source{
-Example for simpatdat
+Example for simpatdag
 }
 \usage{
 simpatdag

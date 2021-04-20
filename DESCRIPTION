@@ -1,7 +1,7 @@
 Package: cinof1
 Type: Package
 Title: Analyse causal inferences in N-of-1 studies
-Version: 0.1.0
+Version: 0.1.1
 Authors@R: person("Thomas","Gaetner",email="thomas.gaertner@student.hpi.de", role = c("aut", "cre"))
 Description: This package provides functions for analysing causal inferences in N-of-1 studies. 
     It contains an API to DAGs, bayesian networks and so on.
@@ -13,7 +13,9 @@ Imports:
     bnlearn,
     dagitty,
     geepack,
-    psych
+    psych,
+    ggplot2,
+    caret
 Suggests: 
     ggdag
 Depends: 

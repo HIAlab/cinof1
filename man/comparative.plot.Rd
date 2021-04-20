@@ -4,7 +4,14 @@
 \alias{comparative.plot}
 \title{Comparative Plot}
 \usage{
-comparative.plot(data, exposure, outcome)
+comparative.plot(
+  data,
+  exposure,
+  outcome,
+  method = "boxplot",
+  adjustment = 3,
+  title = "Comparative Plot"
+)
 }
 \arguments{
 \item{data}{defines a data frame.}
@@ -12,6 +19,12 @@ comparative.plot(data, exposure, outcome)
 \item{exposure}{defines the exposure variable}
 
 \item{outcome}{defines the outcome variable}
+
+\item{method}{one of boxplot (default) or denseplot}
+
+\item{adjustment}{adjust parameter for ggplot2::geom_density}
+
+\item{title}{title string for plot}
 }
 \description{
 This function creates a comparative within a tretment variable.
