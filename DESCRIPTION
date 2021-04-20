@@ -16,7 +16,7 @@ Imports:
     ggplot2,
     caret
 Suggests: 
-    ggdag
-    dagitty,
+    ggdag,
+    dagitty
 Depends: 
     R (>= 2.10)
