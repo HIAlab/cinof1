@@ -84,7 +84,6 @@ fit.adj.lm(data = simpatdat, outcome = outcome, exposure = exposure, variables =
 ```
 
 
-
 ## Bayesian
 
 Bayesian Networks are used to calculated the probability of outcome variables adjusted for confounders. For that, a dag is required, which identifies the relations between the variables.
