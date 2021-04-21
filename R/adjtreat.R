@@ -38,19 +38,30 @@ fit.adj.lm <- function(data, outcome, exposure, variables, effects, id, time_col
   }
 
 
-  for (exposure.column in exposure.columns){
+  adj.exposure.columns <- c()
+
+  for(i in c(1:length(exposure.columns))){
+    exposure.column <- exposure.columns[i]
     gamma <- effects[[paste(exposure.column, "gamma", sep = ".")]]
     tau <- effects[[paste(exposure.column, "tau", sep = ".")]]
-    data[,exposure.column] <- gen_treatment_effect(data, exposure=exposure.column, gamma=gamma, tau=tau, id=id, time_col = time_col)
+    data <- gen.treatment.effect.col(data, exposure=exposure.column, gamma=gamma, tau=tau, id=id, time_col = time_col)
+    adj.exposure.columns[i] <- paste(exposure.column,"gamma",gamma,"tau",tau, sep=".")
   }
 
-  str_formula <- sprintf("%s ~ %s", outcome, paste(exposure.columns, variables, sep=" + ", collapse = " + "))
+  str_formula <- sprintf("%s ~ %s", outcome, paste(adj.exposure.columns, variables, sep=" + ", collapse = " + "))
   lin_m <- lm(formula(str_formula), data = data, na.action = na.omit)
   return(lin_m)
 }
 
-
 #' Generate Treatment Effect
+est.effect <- function(x_i, exposure_j, tau, gamma){
+  return(x_i + ((1 - x_i) / tau) * exposure_j - (x_i / gamma) * (1 - exposure_j))
+}
+
+
+
+#' Generate Treatment Effect Column
+#'
 #' @description  This function generates an expected treatment effect for each time point based on gamma and tau.
 #' @param treatment vector of 1 (treated) and 0 (not treated)
 #' @param gamma wash-in effect (default 1)
@@ -64,22 +75,36 @@ fit.adj.lm <- function(data, outcome, exposure, variables, effects, id, time_col
 #' tau <- 7
 #' gen_treatment_effect(treatment, gamma, tau)
 
-gen_treatment_effect <- function(data, exposure, gamma, tau, id, time_col) {
+gen.treatment.effect.col <- function(data, exposure, gamma, tau, id, time_col) {
 
-  est_effect <- rep(NA, nrow(data))
-  for(v in c(1:length(est_effect))){
+  unique.pat.ids <- unique(data[,id])
 
-    data_point <- data[data[,id] == data[v,id] & data[,time_col] == data[v,time_col]-1,]
-    if (!nrow(data_point)==0){
-      x_j <- data_point[1,exposure]
-    }else{
-      x_j <- 0
+  res.data <- foreach::foreach(i = 1:length(unique.pat.ids) , .combine ="rbind") %dopar% {
+    patient.id <- unique.pat.ids[i]
+    pat.data <- data[data[,id]==patient.id,]
+
+    pat.data[,paste(exposure,"gamma",gamma,"tau",tau, sep=".")] <- rep(NA, nrow(pat.data))
+
+    pat.data <- pat.data[order(pat.data[,time_col]),]
+
+    for(v in c(1:nrow(pat.data))){
+      if (v>1){
+        x_i <- pat.data[v-1,paste(exposure,"gamma",gamma,"tau",tau, sep=".")]
+      }else{
+        x_i <- 0
+      }
+
+      e_j <- pat.data[v,exposure]
+
+
+      pat.data[v,paste(exposure,"gamma",gamma,"tau",tau, sep=".")] <- est.effect(x_i, e_j, tau, gamma)
     }
-
-    est_effect[v] = (x_j + ((1 - x_j) / tau) * data[v,exposure] - (x_j / gamma) * (1 - data[v,exposure]))
+    pat.data
   }
-  return(est_effect)
+  return(res.data)
 }
+
+
 
 #' Estimate Gamma and Tau
 #' @description This function analyzes a patient with time varying treatment.

@@ -14,7 +14,8 @@ Imports:
     geepack,
     psych,
     ggplot2,
-    caret
+    caret,
+    doParallel
 Suggests: 
     ggdag,
     dagitty
