@@ -177,14 +177,20 @@ estimate_gamma_tau <- function(data, outcome, exposure, variables, bound=10, sym
     grid <- expand.grid(grid)
   }
 
-  r2 <- c()
+  library(doParallel)
+
+  no_cores <- detectCores() - 1
+  registerDoParallel(cores=no_cores)
+  cl <- makeCluster(no_cores, type="FORK")
 
   #iterate over values
-  for(row_id in c(1:nrow(grid))){
+  c2 <- foreach(row_id = c(1:nrow(grid))) %dopar% {
     test.effects = grid[row_id,]
     res <- summary(fit.adj.lm(data, outcome, exposure.names, variables, effects=test.effects, id=id, time_col = time_col, one.hot=TRUE))
-    r2[row_id] <- res$adj.r.squared
+    res$adj.r.squared
   }
+
+  stopCluster(cl)
 
   # get the best model by the biggest r2 value
   best <- which(r2 == max(r2))
