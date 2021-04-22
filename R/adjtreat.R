@@ -81,12 +81,7 @@ gen.treatment.effect.col <- function(data, exposure, gamma, tau, id, time_col) {
 
   unique.pat.ids <- unique(data[,id])
 
-  no_cores <- detectCores() - 1
-  registerDoParallel(cores=no_cores)
-  cl <- makeCluster(no_cores, type="FORK")
-
-
-  res.data <- foreach::foreach(i = 1:length(unique.pat.ids) , .combine ="rbind") %dopar% {
+  res.data <- foreach::foreach(i = 1:length(unique.pat.ids) , .combine ="rbind") %do% {
     patient.id <- unique.pat.ids[i]
     pat.data <- data[data[,id]==patient.id,]
 
@@ -108,7 +103,7 @@ gen.treatment.effect.col <- function(data, exposure, gamma, tau, id, time_col) {
     }
     pat.data
   }
-  stopCluster(cl)
+
   return(res.data)
 }
 
@@ -184,14 +179,14 @@ estimate_gamma_tau <- function(data, outcome, exposure, variables, bound=10, sym
   cl <- makeCluster(no_cores, type="FORK")
 
   #iterate over values
-  c2 <- foreach(row_id = c(1:nrow(grid))) %dopar% {
+  r2 <- foreach(row_id = c(1:nrow(grid))) %dopar% {
     test.effects = grid[row_id,]
     res <- summary(fit.adj.lm(data, outcome, exposure.names, variables, effects=test.effects, id=id, time_col = time_col, one.hot=TRUE))
     res$adj.r.squared
   }
 
   stopCluster(cl)
-
+  r2 <- unlist(r2, use.names=FALSE)
   # get the best model by the biggest r2 value
   best <- which(r2 == max(r2))
   best.values <- grid[best,]
