@@ -77,11 +77,13 @@ est.effect <- function(x_i, exposure_j, tau, gamma){
 
 gen.treatment.effect.col <- function(data, exposure, gamma, tau, id, time_col) {
 
+  library(doParallel)
+
   unique.pat.ids <- unique(data[,id])
 
-  no_cores <- parallel::detectCores() - 1
-  doParallel::registerDoParallel(cores=no_cores)
-  cl <- parallel::makeCluster(no_cores, type="FORK")
+  no_cores <- detectCores() - 1
+  registerDoParallel(cores=no_cores)
+  cl <- makeCluster(no_cores, type="FORK")
 
 
   res.data <- foreach::foreach(i = 1:length(unique.pat.ids) , .combine ="rbind") %dopar% {
