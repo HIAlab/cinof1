@@ -79,6 +79,11 @@ gen.treatment.effect.col <- function(data, exposure, gamma, tau, id, time_col) {
 
   unique.pat.ids <- unique(data[,id])
 
+  no_cores <- parallel::detectCores() - 1
+  doParallel::registerDoParallel(cores=no_cores)
+  cl <- parallel::makeCluster(no_cores, type="FORK")
+
+
   res.data <- foreach::foreach(i = 1:length(unique.pat.ids) , .combine ="rbind") %dopar% {
     patient.id <- unique.pat.ids[i]
     pat.data <- data[data[,id]==patient.id,]
@@ -101,6 +106,7 @@ gen.treatment.effect.col <- function(data, exposure, gamma, tau, id, time_col) {
     }
     pat.data
   }
+  stopCluster(cl)
   return(res.data)
 }
 
