@@ -92,7 +92,7 @@ gen.treatment.effect.col <- function(data, exposure, gamma, tau, id, time_col) {
     for(v in c(1:nrow(pat.data))){
       if (v>1){
         x_i <- pat.data[v-1,paste(exposure,"gamma",gamma,"tau",tau, sep=".")]
-        if (is.na(x_1)){
+        if (is.na(x_i)){
           x_i <- 0
         }
       }else{
