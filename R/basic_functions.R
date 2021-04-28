@@ -28,7 +28,7 @@ comparative.plot <- function(data, exposure, outcome, method="boxplot", adjustme
 
 
   for(i in c(1:length(labels))){
-    mu[i,"mean"] <- (mean(data[data[,exposure]==labels[i],outcome]))
+    mu[i,"mean"] <- (mean(na.omit(data[data[,exposure]==labels[i],outcome])))
   }
 
 
@@ -39,12 +39,15 @@ comparative.plot <- function(data, exposure, outcome, method="boxplot", adjustme
       ggplot2::ggtitle(label=title, subtitle = paste("Mean difference: ", round(abs(mu[1,"mean"]-mu[2,"mean"]), digits = 3))) +
       ggplot2::geom_vline(data=mu, ggplot2::aes(xintercept=mean),
                  linetype="dashed") +
-      ggplot2::scale_color_brewer(palette="Dark2")
+      ggplot2::scale_color_brewer(palette="Dark2") +
+      ggplot2::theme(legend.position="top")
+
     return(p)
   }else{
     p<-ggplot2::ggplot(data=data, mapping=ggplot2::aes_string(x=exposure, y=outcome, color=outcome)) +
       ggplot2::geom_boxplot() +
       ggplot2::ggtitle(label=title, subtitle = paste("Mean difference: ", round(abs(mu[1,"mean"]-mu[2,"mean"]), digits = 3)))
+
     return(p)
   }
 }
