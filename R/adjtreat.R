@@ -105,7 +105,6 @@ gen.treatment.effect.col <- function(data, exposure, gamma, tau, id, time_col) {
         x_i <- 0
       }
 
-
       pat.data[v,paste(exposure,"gamma",gamma,"tau",tau, sep=".")] <- est.effect(x_i, e_j, tau, gamma)
     }
     pat.data
@@ -149,8 +148,6 @@ estimate_gamma_tau <- function(data, outcome, exposure, variables, bound=10, sym
     exposure <- NA
     exposure.names <- exposure
   }
-
-
 
   grid <- list()
 

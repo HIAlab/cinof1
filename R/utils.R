@@ -13,7 +13,7 @@ prep.onehot <- function(data, var){
 
   for(i in c(1:length(levels))){
     if(levels[i]!="" && !is.na(levels[i])){
-      data[,paste(var, levels[i], sep=".")] <- ifelse(data[,var]==levels[i], 1,0)
+      data[,paste(var, levels[i], sep=".")] <- ifelse(is.na(data[,var]), NA, ifelse(data[,var]==levels[i], 1,0))
       new_variables[j] <- paste(var, levels[i], sep=".")
       j <- j + 1
     }
