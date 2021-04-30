@@ -16,9 +16,11 @@ This R Markdown document shows the usage of the package `cino1`.
 
 ```{r, warnings=FALSE}
 # Install local package
+devtools::document()
 install.packages("~/Documents/Masterarbeit/Package/nofone/", repos = NULL, type="source")
 # load package
 library(cinof1)
+library(doParallel)
 ```
 
 
@@ -72,14 +74,17 @@ wilcox.nofone(simpatdat, exposure = exposure, outcome = outcome)
 ## Adjust Wash In and Wash Out
 
 
-```{r}
+```{r adj.wash.in}
 outcome <- "Uncertain_Low_Back_Pain"
 exposure <- "treatment"
 variables <- c("Activity")
 id <- "patient_id"
 time_col <- "day"
 
-result <- estimate_gamma_tau(data = simpatdat, outcome = outcome, exposure = exposure, variables = variables, bound = 3, symmetric = TRUE, id=id, time_col = time_col)
+result <- estimate_gamma_tau(data = simpatdat, outcome = outcome, exposure = exposure, variables = variables, bound = 10, symmetric = TRUE, id=id, time_col = time_col)
+
+result
+
 fit.adj.lm(data = simpatdat, outcome = outcome, exposure = exposure, variables = variables, effects = result$best, id = id, time_col = time_col)
 ```
 
@@ -98,8 +103,6 @@ time_col <- "day"
 # Load data
 load("data/simpatdag.rda")
 load("data/simpatdat.rda")
-
-plot(simpatdag)
 
 # Dag preprocessing
 bn.dag <- bn.prep.dag(simpatdag)
@@ -132,7 +135,7 @@ load("data/simpatdat.rda")
 
 
 ### Fit G-Estimation by Iteration
-It iterates over several values for $\psi$ and returns a dataframe with $\psi$ and corresponding $\alpha$
+It iterates over several values for $\psi$ and returns a data frame with $\psi$ and corresponding $\alpha$
 ```{r g.est method.iter}
 outcome <- "Uncertain_Low_Back_Pain"
 exposure <- "treatment"
@@ -171,3 +174,4 @@ confounder <- c("Activity")
 id <- "patient_id"
 nofgest(simpatdat, outcome, exposure, confounder, id, method="rec")
 ```
+

@@ -3,7 +3,7 @@
 export(bn.fit.dag)
 export(bn.prep.dag)
 export(bn.prep.data)
-export(calc_beta)
+export(bn.results.samples)
 export(comparative.plot)
 export(estimate_gamma_tau)
 export(fit.adj.lm)

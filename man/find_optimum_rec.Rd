@@ -12,12 +12,15 @@ find_optimum_rec(
   id,
   upper_bound_psi,
   upper_bound_beta,
+  upper_se = 0,
   lower_bound_psi,
   lower_bound_beta,
+  lower_se = 0,
   number_it,
   max_number_it,
   epsilon,
-  method
+  method,
+  verbose = TRUE
 )
 }
 \description{

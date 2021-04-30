@@ -22,6 +22,12 @@ prep.onehot <- function(data, var){
 }
 
 
-prep.normalize <- function(data){
-  return((data-mean(data))/sd(data))
+prep.normalize <- function(data, scale="sd"){
+  if(scale=="sd"){
+    return((data-mean(data))/sd(data))
+  }else if(scale=="uni"){
+    return((data-min(data))/(max(data)-min(data)))
+  }else{
+    return(data())
+  }
 }

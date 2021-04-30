@@ -51,12 +51,13 @@ bn.fit.dag <- function(data, dag, method = "bayes"){
 #' @param data R data frame to fit the Bayesian network
 #' @param id column name of patient identifier (only needed when lag column)
 #' @param time_col column name of time (integer expected, only needed when lag column)
+#' @param factorize specify weather all columns should be factors or not
 #' @return data frame
 #' @examples
 #' load(simpatdag)
 #' bn.prep.dag(simpatdag)
 #' @export
-bn.prep.data <- function(dag, data, id="patient_id", time_col="day"){
+bn.prep.data <- function(dag, data, id="patient_id", time_col="day", factorize=FALSE, normalize=FALSE){
   # get relevant columns
   names <- dag$variables
   # calculate lag
@@ -82,6 +83,13 @@ bn.prep.data <- function(dag, data, id="patient_id", time_col="day"){
         levels(data[,name]) <- levels(data[,var_name])
       }
     }
+    # factorize
+    if(normalize){
+      data[,name] <- prep.normalize(data = data[,name], scale="uni")
+    }
+    if(factorize & name != dag$outcome){
+      data[,name] <- as.factor(data[,name])
+    }
   }
   # filter column names
   data <- data[,names]
@@ -89,3 +97,46 @@ bn.prep.data <- function(dag, data, id="patient_id", time_col="day"){
   return(data)
 }
 
+
+#' Results
+#' @description This function calculates for each exposure the mean outcome
+#' @param dag result from bn.prep.dag
+#' @param fitted.model bn.fitted model
+#' @param exposure_levels levels to test exposure for
+#' @param verbose Identify if the function should print the results.
+#' @return data frame
+#' @examples
+#' @export
+bn.results.samples <- function(fitted.model, dag, exposure_levels, verbose=TRUE){
+  # Function to calculate standard error
+  standard.error <- function(x){
+    return(sd(x)/sqrt(length(x)))
+  }
+
+  results <- data.frame(Exposure = rep(NA,0), Mean = rep(NA,0), Std.Error = rep(NA,0))
+
+  data <- list()
+
+  # Loop over all exposures
+  for(exp_level in exposure_levels){
+    exp <- list(exp = exp_level)
+    names(exp) <- bn.dag$exposure
+
+    sim.outcome <- na.omit(cpdist(fitted.model, node = c(bn.dag$outcome), evidence = exp, method = "lw"))
+
+    sim.mean <- mean(sim.outcome[,bn.dag$outcome])
+    sim.err <- standard.error(sim.outcome[,bn.dag$outcome])
+
+    results[nrow(results)+1,] <- c(exp, sim.mean, sim.err)
+
+    if(verbose){
+      lines <- c(exp_level,
+                 paste("Mean", sim.mean),
+                 paste("Std.Error", sim.err))
+
+      writeLines(paste(lines, sep="\n", collapse = "\n"))
+    }
+    data[exp_level] <- sim.outcome
+  }
+  return(results)
+}

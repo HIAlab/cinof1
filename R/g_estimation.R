@@ -5,14 +5,21 @@
 ##############################################################
 
 #' Calc beta
-#' @export
+#' @description This function fits a geeglm to the data for a given psi. it returns a list of values
+#' @param data data frame with values
+#' @param psi number, given psi
+#' @param outcome string, defines the outcome variable
+#' @param exposure string, defines the exposure variable
+#' @param confounder string vector, defines the confounder variables
+#' @param id string, identify the unique identifier
 calc_beta <- function(data, psi, outcome, exposure, confounder, id){
   data$Hpsi <- as.numeric(data[,outcome])-psi*as.numeric(data[,exposure])
   summary(data)
   str_formula <- sprintf("%s ~ %s", exposure, paste(confounder, "Hpsi", sep=" + ", collapse = " + "))
   g.est <- geepack::geeglm(as.formula(str_formula), family=gaussian, data=data, id = data[[id]], corstr="ar1")
   beta <- summary(g.est)$coefficients["Hpsi","Estimate"]
-  return(beta)
+  se <- summary(g.est)$coefficients["Hpsi","Std.err"]
+  return(list(beta = beta, se = se))
 }
 
 
@@ -40,7 +47,8 @@ nofgest <- function(
   upper_bound_psi=2,
   lower_bound_psi=-2,
   max_number_it=NULL,
-  steps=10){
+  steps=10,
+  verbose=TRUE){
 
   # handle missing values
   if(missing(max_number_it)) {
@@ -53,7 +61,7 @@ nofgest <- function(
 
 
   # Default values
-  number_it <- 1
+  number_it <- 0
 
   if(method=="iterate"){
     return(find_optimum_iterate(data,
@@ -65,23 +73,34 @@ nofgest <- function(
                                 lower_bound_psi,
                                 steps))
   }else{
-    upper_bound_beta <-  calc_beta(data = data, psi = upper_bound_psi, outcome, exposure, confounder, id=id)
-    lower_bound_beta <-  calc_beta(data = data, psi = lower_bound_psi, outcome, exposure, confounder, id=id)
+    res <- calc_beta(data = data, psi = upper_bound_psi, outcome, exposure, confounder, id=id)
+    upper_bound_beta <- res$beta
+    upper_se <- res$se
+
+    res <- calc_beta(data = data, psi = lower_bound_psi, outcome, exposure, confounder, id=id)
+    lower_bound_beta <-  res$beta
+    lower_se <- res$se
 
     # return rec search
-    return(find_optimum_rec(data,
-                            outcome,
-                            exposure,
-                            confounder,
-                            id,
-                            upper_bound_psi,
-                            upper_bound_beta,
-                            lower_bound_psi,
-                            lower_bound_beta,
-                            number_it,
-                            max_number_it,
-                            epsilon,
-                            method=method))
+    df <- find_optimum_rec(data,
+                     outcome,
+                     exposure,
+                     confounder,
+                     id,
+                     upper_bound_psi,
+                     upper_bound_beta,
+                     upper_se,
+                     lower_bound_psi,
+                     lower_bound_beta,
+                     lower_se,
+                     number_it+1,
+                     max_number_it,
+                     epsilon,
+                     method=method,
+                     verbose=verbose)
+
+    df[nrow(df) + 1,] <- c(upper_bound_psi, upper_bound_beta, upper_se, lower_bound_psi, lower_bound_beta, lower_se, number_it)
+    return(df)
   }
 }
 
@@ -106,25 +125,28 @@ find_optimum_rec <- function(
   id,
   upper_bound_psi,
   upper_bound_beta,
+  upper_se=0,
   lower_bound_psi,
   lower_bound_beta,
+  lower_se=0,
   number_it,
   max_number_it,
   epsilon,
-  method){
+  method,
+  verbose=TRUE){
 
 
   process_return_values <- function(){
-    print(paste("Number of iterations:", number_it))
     df <- data.frame(upper_psi = double(),
-               uppter_beta = double(),
+               upper_beta = double(),
+               upper_se = double(),
                lower_psi = double(),
                lower_beta = double(),
+               lower_se = double(),
                iteration = double())
-    df[1,] <- c(upper_bound_psi, upper_bound_beta,  lower_bound_psi, lower_bound_beta, number_it)
+    df[1,] <- c(upper_bound_psi, upper_bound_beta,  upper_se, lower_bound_psi, lower_bound_beta,lower_se, number_it)
     return(df)
   }
-
 
   if(abs(upper_bound_beta) < epsilon){
     print(paste("Converged! Optimal Psi: ", upper_bound_psi))
@@ -136,10 +158,21 @@ find_optimum_rec <- function(
 
   if(!is.null(max_number_it)){
     if(number_it == max_number_it){
-    print("Max Iterations")
+    print("Max Iterations:", number_it)
     return(process_return_values())
     }
   }
+
+  if (verbose){
+    vec <- c(paste("Iteration:", number_it),
+             paste("Upper Psi:", upper_bound_psi),
+             paste("Upper Beta:", upper_bound_beta),
+             paste("Lower Psi:", lower_bound_psi),
+             paste("Lower Beta:", lower_bound_beta),
+             "")
+    writeLines(paste(vec, sep="\n", collapse = "\n"))
+  }
+
 
   if(method=="rec_mean"){
     new_psi <- mean(c(upper_bound_psi, lower_bound_psi))
@@ -153,24 +186,42 @@ find_optimum_rec <- function(
     new_psi <- -a/m
   }
 
-  new_beta <- calc_beta(data = data, psi = new_psi, outcome, exposure, confounder, id)
+  res <- calc_beta(data = data, psi = new_psi, outcome, exposure, confounder, id)
+
+  new_beta <- res$beta
+  new_se <- res$se
 
   if (((upper_bound_beta >= 0) & (new_beta >=0) ) | ((upper_bound_beta <= 0) & (new_beta <=0))){
     upper_bound_psi <- new_psi
     upper_bound_beta <- new_beta
-    df <- find_optimum_rec(data, outcome, exposure, confounder, id, upper_bound_psi, upper_bound_beta, lower_bound_psi,lower_bound_beta, number_it, max_number_it + 1, epsilon, method=method)
-    df[nrow(df) + 1,] <- c(upper_bound_psi, upper_bound_beta,  lower_bound_psi, lower_bound_beta, number_it)
-    return(df)
+    upper_se <- new_se
   }else if(((lower_bound_beta >= 0) & (new_beta >=0)) | ((lower_bound_beta <= 0) & (new_beta <=0))){
     lower_bound_psi <- new_psi
     lower_bound_beta <- new_beta
-    df <- find_optimum_rec(data, outcome, exposure, confounder, id, upper_bound_psi, upper_bound_beta, lower_bound_psi,lower_bound_beta, number_it, max_number_it + 1, epsilon, method=method)
-    df[nrow(df) + 1,] <- c(upper_bound_psi, upper_bound_beta,  lower_bound_psi, lower_bound_beta, number_it)
-    return(df)
+    lower_bound_se <- new_se
   }else{
     print(paste("Error at iteration ", number_it))
     return(process_return_values())
   }
+
+  df <- find_optimum_rec(data = data,
+                         outcome = outcome,
+                         exposure = exposure,
+                         confounder = confounder,
+                         id = id,
+                         upper_bound_psi = upper_bound_psi,
+                         upper_bound_beta = upper_bound_beta,
+                         upper_se = upper_se,
+                         lower_bound_psi = lower_bound_psi,
+                         lower_bound_beta = lower_bound_beta,
+                         lower_se = lower_se,
+                         number_it = number_it + 1,
+                         max_number_it = max_number_it,
+                         epsilon = epsilon,
+                         method=method,
+                         verbose = verbose)
+  df[nrow(df) + 1,] <-  c(upper_bound_psi, upper_bound_beta, upper_se, lower_bound_psi, lower_bound_beta, lower_se, number_it)
+  return(df)
 
 }
 
@@ -208,13 +259,15 @@ find_optimum_iterate <- function(data,
 
   df <- foreach::foreach(i = c(1:length(psis)), .combine ="rbind") %dopar% {
     psi <- psis[[i]]
-    beta <- calc_beta(data = data, psi = psi, outcome, exposure, confounder, id)
-    c(psi, beta)
+    res <- calc_beta(data = data, psi = psi, outcome, exposure, confounder, id)
+    beta <- res$beta
+    se <- res$se
+    c(psi, beta, se)
   }
 
   # Stop Cluster
   stopCluster(cl)
 
-  colnames(df) <- c("PSI","Beta")
-  return(df)
+  colnames(df) <- c("PSI","Beta", "Std.Err")
+  return(data.frame(df))
 }

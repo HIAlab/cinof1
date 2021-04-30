@@ -6,6 +6,19 @@
 \usage{
 calc_beta(data, psi, outcome, exposure, confounder, id)
 }
+\arguments{
+\item{data}{data frame with values}
+
+\item{psi}{number, given psi}
+
+\item{outcome}{string, defines the outcome variable}
+
+\item{exposure}{string, defines the exposure variable}
+
+\item{confounder}{string vector, defines the confounder variables}
+
+\item{id}{string, identify the unique identifier}
+}
 \description{
-Calc beta
+This function fits a geeglm to the data for a given psi. it returns a list of values
 }

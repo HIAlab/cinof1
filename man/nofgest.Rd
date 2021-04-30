@@ -14,7 +14,8 @@ nofgest(
   upper_bound_psi = 2,
   lower_bound_psi = -2,
   max_number_it = NULL,
-  steps = 10
+  steps = 10,
+  verbose = TRUE
 )
 }
 \arguments{

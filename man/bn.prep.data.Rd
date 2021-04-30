@@ -4,7 +4,14 @@
 \alias{bn.prep.data}
 \title{Preprocess data}
 \usage{
-bn.prep.data(dag, data, id = "patient_id", time_col = "day")
+bn.prep.data(
+  dag,
+  data,
+  id = "patient_id",
+  time_col = "day",
+  factorize = FALSE,
+  normalize = FALSE
+)
 }
 \arguments{
 \item{dag}{result from bn.prep.dag}
@@ -14,6 +21,8 @@ bn.prep.data(dag, data, id = "patient_id", time_col = "day")
 \item{id}{column name of patient identifier (only needed when lag column)}
 
 \item{time_col}{column name of time (integer expected, only needed when lag column)}
+
+\item{factorize}{specify weather all columns should be factors or not}
 }
 \value{
 data frame

@@ -90,19 +90,22 @@ gen.treatment.effect.col <- function(data, exposure, gamma, tau, id, time_col) {
     pat.data <- pat.data[order(pat.data[,time_col]),]
 
     for(v in c(1:nrow(pat.data))){
-      if (v>1){
-        x_i <- pat.data[v-1,paste(exposure,"gamma",gamma,"tau",tau, sep=".")]
-        if (is.na(x_i)){
-          x_i <- 0
-        }
-      }else{
-        x_i <- 0
-      }
 
       e_j <- pat.data[v,exposure]
       if (is.na(e_j)){
         e_j <- 0
       }
+
+      if (v>1){
+        x_i <- pat.data[v-1,paste(exposure,"gamma",gamma,"tau",tau, sep=".")]
+        if (is.na(x_i)){
+          x_i <- e_j
+        }
+      }else{
+        x_i <- 0
+      }
+
+
       pat.data[v,paste(exposure,"gamma",gamma,"tau",tau, sep=".")] <- est.effect(x_i, e_j, tau, gamma)
     }
     pat.data
