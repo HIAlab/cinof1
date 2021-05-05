@@ -183,19 +183,38 @@ estimate_gamma_tau <- function(data, outcome, exposure, variables, bound=10, sym
   cl <- makeCluster(no_cores, type="FORK")
 
   #iterate over values
-  r2 <- foreach(row_id = c(1:nrow(grid))) %dopar% {
-    test.effects = grid[row_id,]
+  result <- foreach(row_id = c(1:nrow(grid)), .combine = rbind) %dopar% {
+    test.effects <- grid[row_id,]
     res <- summary(fit.adj.lm(data, outcome, exposure.names, variables, effects=test.effects, id=id, time_col = time_col, one.hot=TRUE))
-    res$adj.r.squared
+
+
+    # create return values
+    res_vec <- list()
+    res_vec$r2 <- res$adj.r.squared
+
+    for(exposure.column in exposure.names){
+      gamma <- test.effects[[paste(exposure.column, "gamma", sep = ".")]]
+      tau <- test.effects[[paste(exposure.column, "tau", sep = ".")]]
+      exp <- paste(exposure.column,"gamma",gamma,"tau",tau, sep=".")
+
+      if(exp %in% row.names(res$coefficients)){
+        res_vec[[paste(exposure.column, "Estimate")]] <- res$coefficients[exp,"Estimate"]
+        res_vec[[paste(exposure.column, "Std. Error")]] <- res$coefficients[exp,"Std. Error"]
+      }else{
+        res_vec[[paste(exposure.column, "Estimate")]] <- NA
+        res_vec[[paste(exposure.column, "Std. Error")]] <-NA
+      }
+    }
+    data.frame(res_vec)
   }
 
   stopCluster(cl)
-  r2 <- unlist(r2, use.names=FALSE)
+  r2 <- result$r2
   # get the best model by the biggest r2 value
   best <- which(r2 == max(r2))
   best.values <- grid[best,]
 
-  return(list(data = cbind(grid, data.frame(r2)), best=best.values))
+  return(list(data = cbind(grid, result), best=best.values))
 }
 
 

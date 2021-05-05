@@ -14,15 +14,12 @@
 #' @param id string, identify the unique identifier
 calc_beta <- function(data, psi, outcome, exposure, confounder, id){
   data$Hpsi <- as.numeric(data[,outcome])-psi*as.numeric(data[,exposure])
-  summary(data)
   str_formula <- sprintf("%s ~ %s", exposure, paste(confounder, "Hpsi", sep=" + ", collapse = " + "))
-  g.est <- geepack::geeglm(as.formula(str_formula), family=gaussian, data=data, id = data[[id]], corstr="ar1")
+  g.est <- geepack::geeglm(as.formula(str_formula), family=gaussian, data=data, id = data[[id]], corstr="independence")
   beta <- summary(g.est)$coefficients["Hpsi","Estimate"]
   se <- summary(g.est)$coefficients["Hpsi","Std.err"]
   return(list(beta = beta, se = se))
 }
-
-
 
 
 #' Nofgest
@@ -58,6 +55,7 @@ nofgest <- function(
 
   # prepare data: y must be numeric
   data[,exposure] <- as.numeric(data[,exposure])
+  data[,exposure] <- data[,exposure]-min(data[,exposure])
 
 
   # Default values
