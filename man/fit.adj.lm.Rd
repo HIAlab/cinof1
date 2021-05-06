@@ -9,18 +9,32 @@ fit.adj.lm(
   outcome,
   exposure,
   variables,
-  effects,
   id,
   time_col,
+  effects = NA,
   one.hot = FALSE
 )
 }
 \arguments{
-\item{data}{Data Frame}
+\item{data}{Data Frame with patient data}
+
+\item{outcome}{name of the outcome variable column}
+
+\item{exposure}{name of the exposure variable column}
+
+\item{variables}{vector of names of other variables}
+
+\item{effects}{list of effects for}
+
+\item{one.hot}{boolean weather the exporure
+variable is on hot encoded or not-}
 }
 \value{
 fitted linear model
 }
 \description{
-This function fits a model with a given treatment effect.
+This function fits a linear model with a given treatment effect.
+For that, it pre processes the data with the given effect and returns the
+fitted linear model. An unadjusted linear model can be generated with setting
+`effects` to `NA`.
 }

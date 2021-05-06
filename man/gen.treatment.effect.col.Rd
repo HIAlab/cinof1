@@ -2,22 +2,28 @@
 % Please edit documentation in R/adjtreat.R
 \name{gen.treatment.effect.col}
 \alias{gen.treatment.effect.col}
-\title{Generate Treatment Effect Column}
+\title{Generate Treatment Effect Column (not exported)}
 \usage{
 gen.treatment.effect.col(data, exposure, gamma, tau, id, time_col)
 }
 \arguments{
-\item{gamma}{wash-in effect (default 1)}
+\item{data}{data frame with patients}
 
-\item{tau}{wash-out effect (default 1)}
+\item{exposure}{vector of 1 (treated) and 0 (not treated)}
 
-\item{treatment}{vector of 1 (treated) and 0 (not treated)}
+\item{gamma}{wash-in effect}
+
+\item{tau}{wash-out effect}
+
+\item{id}{defines the unique identifier for each patient}
+
+\item{time_col}{column name, which defines the time}
 }
 \value{
 vector with expected treatment effect
 }
 \description{
-This function generates an expected treatment effect for each time point based on gamma and tau.
+This function generates an expected treatment effect for each time point based on gamma and tau value.
 }
 \examples{
 # Generate dummy data
@@ -25,5 +31,5 @@ treatment <- rep(c(rep(0,7), rep(1,7)),4)
 # run example
 gamma <- 5
 tau <- 7
-gen_treatment_effect(treatment, gamma, tau)
+gen.treatment.effect(treatment, gamma, tau)
 }
