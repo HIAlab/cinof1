@@ -17,11 +17,11 @@
 
 #' Dag
 #'
-#' This is an example dag for the data.
+#' This is an example dag for the data set `simpatdat`. It contains an _exposure_ variable (`treatment`), the _outcome_ variable (`Uncertain_Low_Bacl_Pain`) and one confounding variable (`Activity`).
 #'
-#' @format A dagitty string with an example dag for simpatdat
+#' @format A dagitty string with an example dag for the `simpatdat` data set.
 #' \describe{
-#'   \item{Dag}{dag}
+#'   \item{Dag}{dag string}
 #' }
-#' @source Example for simpatdag
+#' @source This dag represents the causal effects in the example data set `simpatdat`
 "simpatdag"
