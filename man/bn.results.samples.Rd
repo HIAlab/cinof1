@@ -2,7 +2,7 @@
 % Please edit documentation in R/bayesian.R
 \name{bn.results.samples}
 \alias{bn.results.samples}
-\title{Results}
+\title{Calculate Results}
 \usage{
 bn.results.samples(fitted.model, dag, exposure_levels, verbose = TRUE)
 }
@@ -19,5 +19,8 @@ bn.results.samples(fitted.model, dag, exposure_levels, verbose = TRUE)
 data frame
 }
 \description{
-This function calculates for each exposure the mean outcome
+This function calculates for each exposure the mean outcome on a sample and was implemented to deliver fast results. Nevertheless, the function should not used extensively for giving results as they are not reproducable.
+}
+\examples{
+bn.results.samples(fitted.bn, bn.dag, exposure_levels, FALSE)
 }

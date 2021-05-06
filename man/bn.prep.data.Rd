@@ -28,9 +28,22 @@ bn.prep.data(
 data frame
 }
 \description{
-This function preprocesses a dataframe to be used for bn.fit
+This function is preprocessing a dataframe to be used for bn.fit. For that, columns were transformed into factors and lags were created if required.
 }
 \examples{
-load(simpatdag)
-bn.prep.dag(simpatdag)
+# specify column names
+id <- "patient_id"
+time_col <- "day"
+
+# Load data
+load("data/simpatdag.rda")
+load("data/simpatdat.rda")
+
+# Dag preprocessing
+bn.dag <- bn.prep.dag(simpatdag)
+
+# Data Preprocessing (Factorization)
+simpatdat$Uncertain_Low_Back_Pain <- as.factor(simpatdat$Uncertain_Low_Back_Pain)
+simpatdat$Activity <- cut(simpatdat$Activity, 3, labels=c("low Activity", "middle Activity", "high Activity"))
+bn.data <- bn.prep.data(bn.dag, simpatdat, id, time_col)
 }
