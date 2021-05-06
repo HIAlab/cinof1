@@ -7,10 +7,16 @@ Wilcoxon Test, Linear Models, G-Estimation and Bayesian Networks.
 
 ## Installing
 
-For installing the package, please download the latest release from the page. It could be found [here](link). Unzip the files and install the packages with the following command: 
+For installing the package, please download the latest release from the page. It could be found [here](link). Afterwards you can install the packages with the following command: 
 
 ```
-install.packages(<path_to_extracted_files>, repos = NULL, type="source")
+install.packages(<path_to_tar>)
+```
+
+alternatively you install it directly from github with the following command:
+
+```
+devtools::install_github("thogaertner/cinof1")
 ```
 
 You can use the package in R with `library(cinof1)`. 
