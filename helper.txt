@@ -1,9 +1,0 @@
-#simpatdat <- read.csv(file = "~/Documents/Masterarbeit/Nof1-Simulation/data/activity_params_simple_09-04-2021.csv")
-#simpatdat <- simpatdat[c("patient_id","date","day","block","treatment","Uncertain_Low_Back_Pain","Activity")]
-#usethis::use_data(simpatdat, internal=FALSE, overwrite = TRUE)
-#usethis::use_data(simpatdat, internal=TRUE, overwrite = TRUE)
-#devtools::document()
-#devtools::load_all()
-
-#.Machine$double.eps
-#a <- 2.220446e-16
