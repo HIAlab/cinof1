@@ -10,11 +10,15 @@
 #' @param data defines a data frame.
 #' @param exposure defines the exposure variable
 #' @param outcome defines the outcome variable
-#' @param method one of boxplot (default) or denseplot
+#' @param method one of `boxplot` (default) or  `denseplot`
 #' @param adjustment adjust parameter for ggplot2::geom_density
 #' @param title title string for plot
 #' @examples
-#' comparative.plot(data)
+#' # Define outcome and exposure column
+#' outcome <- "Uncertain_Low_Back_Pain"
+#' exposure <- "treatment"
+#' # Plot outcome among different exposures
+#' comparative.plot(simpatdat, exposure = exposure, outcome = outcome)
 #' @export
 comparative.plot <- function(data, exposure, outcome, method="boxplot", adjustment=3, title = "Comparative Plot"){
   # plot results

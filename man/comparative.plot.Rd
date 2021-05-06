@@ -20,7 +20,7 @@ comparative.plot(
 
 \item{outcome}{defines the outcome variable}
 
-\item{method}{one of boxplot (default) or denseplot}
+\item{method}{one of `boxplot` (default) or  `denseplot`}
 
 \item{adjustment}{adjust parameter for ggplot2::geom_density}
 
@@ -30,5 +30,9 @@ comparative.plot(
 This function creates a comparative within a tretment variable.
 }
 \examples{
-comparative.plot(data)
+# Define outcome and exposure column
+outcome <- "Uncertain_Low_Back_Pain"
+exposure <- "treatment"
+# Plot outcome among different exposures
+comparative.plot(simpatdat, exposure = exposure, outcome = outcome)
 }
