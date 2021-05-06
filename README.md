@@ -1,3 +1,11 @@
+[![Contributors][contributors-shield]][https://github.com/thogaertner/cinof1/graphs/contributors]
+[![Forks][forks-shield]][https://github.com/thogaertner/cinof1.git]
+[![Stargazers][stars-shield]][https://github.com/thogaertner/cinof1/stargazers]
+[![Issues][issues-shield]][https://github.com/thogaertner/cinof1/issues]
+[![MIT License][license-shield]][https://github.com/thogaertner/cinof1/blob/LICENSE.md]
+
+
+
 # Analyse causal inferences in N-of-1 studies (cinof1)
 
 ## Description
