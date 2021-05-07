@@ -4,7 +4,15 @@
 \alias{calc_beta}
 \title{Calc beta}
 \usage{
-calc_beta(data, psi, outcome, exposure, confounder, id)
+calc_beta(
+  data,
+  psi,
+  outcome,
+  exposure,
+  confounder,
+  id,
+  corstr = "independence"
+)
 }
 \arguments{
 \item{data}{data frame with values}
@@ -18,6 +26,8 @@ calc_beta(data, psi, outcome, exposure, confounder, id)
 \item{confounder}{string vector, defines the confounder variables}
 
 \item{id}{string, identify the unique identifier}
+
+\item{corstr}{a character string specifying the correlation structure. The following are permitted: '"independence"', '"exchangeable"', '"ar1"', '"unstructured"' and '"userdefined"'}
 }
 \description{
 This function fits a geeglm to the data for a given psi. it returns a list of values

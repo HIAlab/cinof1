@@ -15,6 +15,7 @@ nofgest(
   lower_bound_psi = -2,
   max_number_it = NULL,
   steps = 10,
+  corstr = "independence",
   verbose = TRUE
 )
 }
@@ -29,7 +30,13 @@ nofgest(
 
 \item{id}{patient id}
 
-\item{max_number_it}{max umber of iterations}
+\item{max_number_it}{max number of iterations}
+
+\item{steps}{number of steps if iteration}
+
+\item{corstr}{a character string specifying the correlation structure. The following are permitted: '"independence"', '"exchangeable"', '"ar1"', '"unstructured"' and '"userdefined"'}
+
+\item{verbose}{Boolean, if prelimnary results should be printed}
 }
 \description{
 This function use standard IV estimator via additive marginal structural models to analyse a treatment effect

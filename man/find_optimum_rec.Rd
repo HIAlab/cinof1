@@ -20,8 +20,34 @@ find_optimum_rec(
   max_number_it,
   epsilon,
   method,
+  corstr = "\\"independence\\"",
   verbose = TRUE
 )
+}
+\arguments{
+\item{data}{data frame with patients}
+
+\item{outcome}{outcome string}
+
+\item{exposure}{exposure string}
+
+\item{confounder}{list of confounders}
+
+\item{id}{id variable}
+
+\item{upper_bound_psi}{double, upper bound psi}
+
+\item{lower_bound_psi}{double, lower bound psi}
+
+\item{number_it}{number of iteration (current)}
+
+\item{max_number_it}{number max iterations}
+
+\item{epsilon}{target epsilon}
+
+\item{corstr}{a character string specifying the correlation structure. The following are permitted: '"independence"', '"exchangeable"', '"ar1"', '"unstructured"' and '"userdefined"'}
+
+\item{verbose}{boolean for printing}
 }
 \description{
 This function finds the best psi value recursively

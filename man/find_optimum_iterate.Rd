@@ -12,8 +12,30 @@ find_optimum_iterate(
   id,
   upper_bound_psi,
   lower_bound_psi,
-  steps
+  steps,
+  corstr = "independence"
 )
+}
+\arguments{
+\item{data}{data frame with patient data}
+
+\item{outcome}{outcome string}
+
+\item{exposure}{exposure string}
+
+\item{confounder}{list of confounders}
+
+\item{id}{id variable}
+
+\item{upper_bound_psi}{upper psi}
+
+\item{lower_bound_psi}{lower psi}
+
+\item{steps}{steps between lower and upper psi}
+
+\item{corstr}{a character string specifying the correlation structure. The following are permitted: '"independence"', '"exchangeable"', '"ar1"', '"unstructured"' and '"userdefined"'}
+
+\item{number_it}{current iteration}
 }
 \description{
 This function finds the best psi value brute forced

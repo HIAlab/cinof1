@@ -5,7 +5,7 @@ date: "4/13/2021"
 output: pdf_document
 ---
 
-```{r setup, include=FALSE}
+```{r setup ,  message = FALSE, warnings = FALSE}
 devtools::document()
 knitr::opts_chunk$set(echo = TRUE)
 ```
@@ -14,7 +14,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 This R Markdown document shows the usage of the package `cino1`. 
 
-```{r, warnings=FALSE}
+```{r,  message = FALSE, warnings = FALSE  }
 # Install local package
 devtools::document()
 install.packages("~/Documents/Masterarbeit/Package/nofone/", repos = NULL, type="source")
@@ -36,7 +36,7 @@ In this package, a sample data frame is included. It contains data for 300 patie
 * _treatment_: Dummy variable for 2 treatments as factors
 * _Uncertain_Low_Back_Pain_: Dummy variable for Uncertain loq back pain on scale 1-15
 
-```{r data}
+```{r data,  message = FALSE, warnings = FALSE  }
 load("data/simpatdat.rda")
 # Summarize Data
 summary(simpatdat)
@@ -50,7 +50,7 @@ Basic functions for analyse N-of-1 studys are for example wilcox test or compara
 
 To get a first idea about the data and the difference between treatment 1 and treatment 2, a comparative plot could be used. It shows the outcome on the y-Axis against the different treatments on the x-Axis,
 
-```{r basic function comparativ plot}
+```{r basic function comparativ plot,  message = FALSE, warnings = FALSE  }
 # Define outcome and exposure column
 outcome <- "Uncertain_Low_Back_Pain"
 exposure <- "treatment"
@@ -63,7 +63,7 @@ comparative.plot(simpatdat, exposure = exposure, outcome = outcome)
 
 To validate, that there is a difference in both treatments, the Wilcox test could be used. It calculates the p-value for the null hypothesis, that there location shift is equal to zero.
 
-```{r basic function wilcox testt}
+```{r basic function wilcox test,  message = FALSE, warnings = FALSE  }
 # Define outcome and exposure column
 outcome <- "Uncertain_Low_Back_Pain"
 exposure <- "treatment"
@@ -74,14 +74,14 @@ wilcox.nofone(simpatdat, exposure = exposure, outcome = outcome)
 ## Adjust Wash In and Wash Out
 
 
-```{r adj.wash.in}
+```{r adj.wash.in,  message = FALSE, warnings = FALSE  }
 outcome <- "Uncertain_Low_Back_Pain"
 exposure <- "treatment"
 variables <- c("Activity")
 id <- "patient_id"
 time_col <- "day"
 
-result <- estimate_gamma_tau(data = simpatdat, outcome = outcome, exposure = exposure, variables = variables, bound = 2, symmetric = TRUE, id=id, time_col = time_col)
+result <- estimate.gamma.tau(data = simpatdat, outcome = outcome, exposure = exposure, variables = variables, bound = 2, symmetric = TRUE, id=id, time_col = time_col)
 
 result
 
@@ -94,7 +94,7 @@ Bayesian Networks are used to calculated the probability of outcome variables ad
 In this implementation, also lags are included and could be specified in the dag by adding `.lag=` to the variable name.
 
 ###  Preprocess Data
-```{r bn.data}
+```{r bn.data,  message = FALSE, warnings = FALSE  }
 # specify column names
 id <- "patient_id"
 time_col <- "day"
@@ -115,7 +115,7 @@ bn.data <- na.omit(bn.data)
 
 
 ### Fit and Plot Results
-```{r bn.fit}
+```{r bn.fit,  message = FALSE, warnings = FALSE  }
 fitted.bn <- bn.fit.dag(bn.data, bn.dag, method="bayes")
 
 library(bnlearn)
@@ -128,7 +128,7 @@ bn.fit.barchart(fitted.bn$Uncertain_Low_Back_Pain)
 G-Estimation is used to adjust the analysis for causal inferences. For that, three different methods are implemented
 
 ### Load Data
-```{r g.est load data}
+```{r g.est load data,  message = FALSE, warnings = FALSE  }
 load("data/simpatdat.rda")
 ```
 
@@ -144,8 +144,8 @@ df <- nofgest(simpatdat, outcome, exposure, confounder, id, method="iterate", st
 ```
 
 This function is useful to plot a curve for $\alpha$ and $\psi$.
-```{r g.est method.iter plot}
-plot(df , type="l", main=expression(paste("Plot of ", alpha, "( ", psi,")")),
+```{r g.est method.iter plot,  message = FALSE, warnings = FALSE  }
+plot( df$PSI ,df$Beta, type="l", main=expression(paste("Plot of ", alpha, "( ", psi,")")),
         xlab=expression(psi),
         ylab=expression(alpha))
 # Add a second line
@@ -155,23 +155,23 @@ lines( c(-100,100),c(0,0), type = "l", col = "red")
 ### Fit G-Estimation by Recursive Mean
 
 This function approximate $\psi$ by an interval search.
-```{r g.est method.rec_mean}
+```{r g.est method.rec_mean,  message = FALSE, warnings = FALSE  }
 outcome <- "Uncertain_Low_Back_Pain"
 exposure <- "treatment"
 confounder <- c("Activity")
 id <- "patient_id"
-nofgest(simpatdat, outcome, exposure, confounder, id, method="rec_mean")
+nofgest(simpatdat, outcome, exposure, confounder, id, method="rec_mean", max_number_it = 10, verbose=FALSE)
 ```
 
 ### Fit G-Estimation by Recursive Improved
 
 This function approximate $\psi$ by an optimized interval search.
-```{r g.est method.rec_lin}
+```{r g.est method.rec_lin ,  message = FALSE, warnings = FALSE  }
 outcome <- "Uncertain_Low_Back_Pain"
 exposure <- "treatment"
 confounder <- c("Activity")
 id <- "patient_id"
-nofgest(simpatdat, outcome, exposure, confounder, id, method="rec")
+nofgest(simpatdat, outcome, exposure, confounder, id, method="rec", max_number_it = 10, verbose=FALSE)
 ```
 
 
