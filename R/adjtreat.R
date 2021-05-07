@@ -1,6 +1,6 @@
 ##############################################################
 # G-Estimation
-# 4/4/2021
+# last edit 6/5/2021
 # created by T. Gärtner (thomas.gaertner@student.hpi.de)
 ##############################################################
 #
@@ -10,25 +10,34 @@
 
 
 #' Fit LM with Adjusted Treatment Effect
-#' @description This function fits a model with a given treatment effect.
-#' @param data Data Frame
-#' @param exposure
-#' @param outcome
-#' @param variables
-#' @param effects
+#' @description This function fits a linear model with a given treatment effect.
+#' For that, it pre processes the data with the given effect and returns the
+#' fitted linear model. An unadjusted linear model can be generated with setting
+#' `effects` to `NA`.
+#' @param data Data Frame with patient data
+#' @param exposure name of the exposure variable column
+#' @param outcome name of the outcome variable column
+#' @param variables vector of names of other variables
+#' @param effects list of effects for
+#' @param one.hot boolean weather the exporure
+#' variable is on hot encoded or not-
 #' @return fitted linear model
 #' @example
+#' # Define Variables
 #' outcome <- "Uncertain_Low_Back_Pain"
 #' exposure <- "treatment"
 #' variables <- c("Activity")
 #' id <- "patient_id"
 #' time_col <- "day"
 #'
-#' result <- estimate_gamma_tau(data = simpatdat, outcome = outcome, exposure = exposure, variables = variables, bound = 3, symmetric = TRUE, id=id, time_col = time_col)
-#' fit.adj.lm(data = simpatdat, outcome = outcome, exposure = exposure, variables = variables, effects = result$best, id = id, time_col = time_col)
+#' # use the estimate.gamma.tau function to estimate the best gamma tau values
+#' result <- estimate.gamma.tau(data = simpatdat, outcome = outcome, exposure = exposure, variables = variables, bound = 3, symmetric = TRUE, id=id, time_col = time_col)
+#' # fit the adjusted linear model
+#' fit.adj.lm(data = simpatdat, outcome = outcome, exposure = exposure, variables = variables, id = id, time_col = time_col, effects = result$best)
 #' @export
 
-fit.adj.lm <- function(data, outcome, exposure, variables, effects, id, time_col, one.hot=FALSE){
+fit.adj.lm <- function(data, outcome, exposure, variables, id, time_col, effects=NA, one.hot=FALSE){
+  # Prepare One Hot encoding
   if(one.hot==FALSE){
     res <- prep.onehot(data, exposure)
     data <- res$data
@@ -37,35 +46,75 @@ fit.adj.lm <- function(data, outcome, exposure, variables, effects, id, time_col
     exposure.columns <- exposure
   }
 
+  # If no carry-over effects should be adjusted
+  if(is.na(effects)){
+    # generate string formula
+    str_formula <- sprintf("%s ~ %s", outcome, paste(exposure.columns, variables, sep=" + ", collapse = " + "))
+    #fit model
+    lin_m <- lm(formula(str_formula), data = data, na.action = na.omit)
+    # return model
+    return(lin_m)
+  }else{
 
-  adj.exposure.columns <- c()
+    # empty list of adjusted exposure column name
+    adj.exposure.columns <- c()
 
-  for(i in c(1:length(exposure.columns))){
-    exposure.column <- exposure.columns[i]
-    gamma <- effects[[paste(exposure.column, "gamma", sep = ".")]]
-    tau <- effects[[paste(exposure.column, "tau", sep = ".")]]
-    data <- gen.treatment.effect.col(data, exposure=exposure.column, gamma=gamma, tau=tau, id=id, time_col = time_col)
-    adj.exposure.columns[i] <- paste(exposure.column,"gamma",gamma,"tau",tau, sep=".")
+    # iterate over exposure columns
+    # generate for each column the adjusted effect and finally add the name
+    # to adj.exposure.columns
+    for(i in c(1:length(exposure.columns))){
+      exposure.column <- exposure.columns[i]
+      # get gamma tau values from the effect list
+      gamma <- effects[[paste(exposure.column, "gamma", sep = ".")]]
+      tau <- effects[[paste(exposure.column, "tau", sep = ".")]]
+      # prepare data
+      data <- gen.treatment.effect.col(data,
+                                       exposure=exposure.column,
+                                       gamma=gamma,
+                                       tau=tau,
+                                       id=id,
+                                       time_col = time_col)
+      adj.exposure.columns[i] <- paste(exposure.column,
+                                       "gamma",
+                                       gamma,
+                                       "tau",
+                                       tau,
+                                       sep=".")
+    }
+
+    # generate formula
+    str_formula <- sprintf("%s ~ %s",
+                           outcome,
+                           paste(
+                             adj.exposure.columns,
+                             variables,
+                             sep=" + ",
+                             collapse = " + "))
+
+    # fit model
+    lin_m <- lm(formula(str_formula), data = data, na.action = na.omit)
+    # return fitted model
+    return(lin_m)
   }
-
-  str_formula <- sprintf("%s ~ %s", outcome, paste(adj.exposure.columns, variables, sep=" + ", collapse = " + "))
-  lin_m <- lm(formula(str_formula), data = data, na.action = na.omit)
-  return(lin_m)
 }
 
 #' Generate Treatment Effect
+#' Calculates the treatment effect for given values
 est.effect <- function(x_i, exposure_j, tau, gamma){
   return(x_i + ((1 - x_i) / tau) * exposure_j - (x_i / gamma) * (1 - exposure_j))
 }
 
 
 
-#' Generate Treatment Effect Column
+#' Generate Treatment Effect Column (not exported)
 #'
-#' @description  This function generates an expected treatment effect for each time point based on gamma and tau.
-#' @param treatment vector of 1 (treated) and 0 (not treated)
-#' @param gamma wash-in effect (default 1)
-#' @param tau wash-out effect (default 1)
+#' @description  This function generates an expected treatment effect for each time point based on gamma and tau value.
+#' @param data data frame with patients
+#' @param exposure vector of 1 (treated) and 0 (not treated)
+#' @param gamma wash-in effect
+#' @param tau wash-out effect
+#' @param id defines the unique identifier for each patient
+#' @param time_col column name, which defines the time
 #' @return vector with expected treatment effect
 #' @examples
 #' # Generate dummy data
@@ -73,15 +122,12 @@ est.effect <- function(x_i, exposure_j, tau, gamma){
 #' # run example
 #' gamma <- 5
 #' tau <- 7
-#' gen_treatment_effect(treatment, gamma, tau)
-
+#' gen.treatment.effect(treatment, gamma, tau)
 gen.treatment.effect.col <- function(data, exposure, gamma, tau, id, time_col) {
-
-  library(doParallel)
 
   unique.pat.ids <- unique(data[,id])
 
-  res.data <- foreach::foreach(i = 1:length(unique.pat.ids) , .combine ="rbind") %do% {
+  res.data <- foreach::foreach(i = 1:length(unique.pat.ids) , .combine ="rbind") %dopar% {
     patient.id <- unique.pat.ids[i]
     pat.data <- data[data[,id]==patient.id,]
 
@@ -131,13 +177,13 @@ gen.treatment.effect.col <- function(data, exposure, gamma, tau, id, time_col) {
 #' variables <- c("Activity")
 #' id <- "patient_id"
 #' time_col <- "day"
-#' # Estimate best gamma and tau
-#' result <- estimate_gamma_tau(data = simpatdat, outcome = outcome, exposure = exposure, variables = variables, bound = 3, symmetric = TRUE, id=id, time_col = time_col)
-#' # Fit Linear Model
-#' fit.adj.lm(data = simpatdat, outcome = outcome, exposure = exposure, variables = variables, effects = result$best, id = id, time_col = time_col)
 #'
+#' # use the estimate.gamma.tau function to estimate the best gamma tau values
+#' result <- estimate.gamma.tau(data = simpatdat, outcome = outcome, exposure = exposure, variables = variables, bound = 3, symmetric = TRUE, id=id, time_col = time_col)
+#' # fit the adjusted linear model
+#' fit.adj.lm(data = simpatdat, outcome = outcome, exposure = exposure, variables = variables, id = id, time_col = time_col, effects = result$best)
 #' @export
-estimate_gamma_tau <- function(data, outcome, exposure, variables, bound=10, symmetric=TRUE, id="id", time_col="day", one.hot=FALSE) {
+estimate.gamma.tau <- function(data, outcome, exposure, variables, bound=10, symmetric=TRUE, id="id", time_col="day", one.hot=FALSE) {
 
   # Prepare One Hot encodiing
   if(one.hot==FALSE){

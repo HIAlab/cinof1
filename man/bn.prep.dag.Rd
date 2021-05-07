@@ -2,7 +2,7 @@
 % Please edit documentation in R/bayesian.R
 \name{bn.prep.dag}
 \alias{bn.prep.dag}
-\title{Prepare Dag}
+\title{Prepare Dag for BN Methods}
 \usage{
 bn.prep.dag(dag)
 }
@@ -13,9 +13,8 @@ bn.prep.dag(dag)
 bnlearn graph based on DAGitty graph
 }
 \description{
-This function reformat a DAG from DAGitty to bn.learn DAG
+This function reformat a `DAGitty` to `bn.learn` DAG. This is required for further methods.
 }
 \examples{
-load(simpatdag)
 bn.prep.dag(simpatdag)
 }

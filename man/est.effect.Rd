@@ -2,10 +2,12 @@
 % Please edit documentation in R/adjtreat.R
 \name{est.effect}
 \alias{est.effect}
-\title{Generate Treatment Effect}
+\title{Generate Treatment Effect
+Calculates the treatment effect for given values}
 \usage{
 est.effect(x_i, exposure_j, tau, gamma)
 }
 \description{
 Generate Treatment Effect
+Calculates the treatment effect for given values
 }
