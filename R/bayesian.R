@@ -147,12 +147,12 @@ bn.results.samples <- function(fitted.model, dag, exposure_levels, verbose=TRUE)
   # Loop over all exposures
   for(exp_level in exposure_levels){
     exp <- list(exp = exp_level)
-    names(exp) <- bn.dag$exposure
+    names(exp) <- dag$exposure
 
-    sim.outcome <- na.omit(cpdist(fitted.model, node = c(bn.dag$outcome), evidence = exp, method = "lw"))
+    sim.outcome <- na.omit(cpdist(fitted.model, node = c(dag$outcome), evidence = exp, method = "lw"))
 
-    sim.mean <- mean(sim.outcome[,bn.dag$outcome])
-    sim.err <- standard.error(sim.outcome[,bn.dag$outcome])
+    sim.mean <- mean(sim.outcome[,dag$outcome])
+    sim.err <- standard.error(sim.outcome[,dag$outcome])
 
     results[nrow(results)+1,] <- c(exp, sim.mean, sim.err)
 
