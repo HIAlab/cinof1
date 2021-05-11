@@ -149,7 +149,7 @@ bn.results.samples <- function(fitted.model, dag, exposure_levels, verbose=TRUE)
     exp <- list(exp = exp_level)
     names(exp) <- dag$exposure
 
-    sim.outcome <- na.omit(cpdist(fitted.model, node = c(dag$outcome), evidence = exp, method = "lw"))
+    sim.outcome <- na.omit(bnlearn::cpdist(fitted.model, node = c(dag$outcome), evidence = exp, method = "lw"))
 
     sim.mean <- mean(sim.outcome[,dag$outcome])
     sim.err <- standard.error(sim.outcome[,dag$outcome])
