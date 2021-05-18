@@ -7,3 +7,4 @@ dependencies:
   - r-dagitty
   - r-rmarkdown
   - jupytext
+  - jupyterlab-git
