@@ -1,4 +1,5 @@
-[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/nstrelow/cinof1/master?urlpath=lab)
+[![Binder Jupyter Lab](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/nstrelow/cinof1/master?urlpath=lab)
+[![Binder RStudio](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/nstrelow/cinof1/master?urlpath=rstudio)
 [![Contributors][contributors-shield]][contributors-url]
 [![Forks][forks-shield]][forks-url]
 [![Stargazers][stars-shield]][stars-url]
