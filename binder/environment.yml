@@ -6,3 +6,4 @@ dependencies:
   - r-devtools
   - r-dagitty
   - r-rmarkdown
+  - jupytext
