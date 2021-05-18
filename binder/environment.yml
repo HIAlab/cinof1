@@ -5,3 +5,4 @@ dependencies:
   - r-tidyverse
   - r-devtools
   - r-dagitty
+  - r-rmarkdown
