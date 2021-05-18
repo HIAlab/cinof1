@@ -1,0 +1,7 @@
+channels:
+  - conda-forge
+dependencies:
+  - r-base=4
+  - r-tidyverse
+  - r-devtools
+  - r-dagitty
