@@ -1,1 +1,0 @@
-devtools::install_github("thogaertner/cinof1")

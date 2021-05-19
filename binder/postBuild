@@ -1,1 +1,1 @@
-Rscript binder/install-cinof1.R
+Rscript -e "devtools::install_github('thogaertner/cinof1')"
