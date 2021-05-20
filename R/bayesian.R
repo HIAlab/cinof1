@@ -96,11 +96,15 @@ bn.prep.data <- function(dag, data, id="patient_id", time_col="day", factorize=F
       var_name <- res[1]
       lag <- as.numeric(res[2])
       # create lag column
+      
+      no_cores <- detectCores() - 1
+      registerDoParallel(cores=no_cores)
+      cl <- makeCluster(no_cores, type="FORK")
       data <- foreach(id=unique(data[,"patient_id"]), .combine=rbind) %dopar% {
         dat <- data[data[,"patient_id"]==id,]
         dat[,name] <- c(rep(NA, lag), dat[,var_name])[1:nrow(dat)]
-        dat
-      }
+        dat}
+      stopCluster(cl)
       #for(row in c(1:nrow(data))){
       #  data_point <- data[data[,id] == data[row,id] & data[,time_col] == data[row,time_col]-lag,]
       #  if (!nrow(data_point)==0){
