@@ -84,6 +84,7 @@ bn.fit.dag <- function(data, dag, method = "bayes"){
 #' bn.data <- bn.prep.data(bn.dag, simpatdat, id, time_col)
 #' @export
 bn.prep.data <- function(dag, data, id="patient_id", time_col="day", factorize=FALSE, normalize=FALSE){
+  library(doParallel)
   # get relevant columns
   names <- dag$variables
   # calculate lag
@@ -94,17 +95,21 @@ bn.prep.data <- function(dag, data, id="patient_id", time_col="day", factorize=F
       res <- stringr::str_split(name, ".lag_", n = 2, simplify = TRUE)
       var_name <- res[1]
       lag <- as.numeric(res[2])
-      # creat lag column
-      data[,name] <- data[,var_name]
-      for(row in c(1:nrow(data))){
-        data_point <- data[data[,id] == data[row,id] & data[,time_col] == data[row,time_col]-lag,]
-        if (!nrow(data_point)==0){
-          data[row,name] <- data_point[1,var_name]
-        }else{
-          data[row,name] <- NA
-        }
+      # create lag column
+      data <- foreach(id=unique(simpatdat[,"patient_id"]), .combine=rbind) %dopar% {
+        dat <- simpatdat[simpatdat[,"patient_id"]==id,]
+        dat[,name] <- c(rep(NA, lag), dat[,var_name])[1:nrow(dat)]
+        dat
       }
-      if(lapply(simpatdat, class)[[var_name]]=="factor"){
+      #for(row in c(1:nrow(data))){
+      #  data_point <- data[data[,id] == data[row,id] & data[,time_col] == data[row,time_col]-lag,]
+      #  if (!nrow(data_point)==0){
+      #    data[row,name] <- data_point[1,var_name]
+      #  }else{
+      #    data[row,name] <- NA
+      #  }
+      #}
+      if(lapply(data, class)[[var_name]]=="factor"){
         data[,name] <- as.factor(data[,name])
         levels(data[,name]) <- levels(data[,var_name])
       }
