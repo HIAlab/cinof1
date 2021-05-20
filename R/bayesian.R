@@ -96,8 +96,8 @@ bn.prep.data <- function(dag, data, id="patient_id", time_col="day", factorize=F
       var_name <- res[1]
       lag <- as.numeric(res[2])
       # create lag column
-      data <- foreach(id=unique(simpatdat[,"patient_id"]), .combine=rbind) %dopar% {
-        dat <- simpatdat[simpatdat[,"patient_id"]==id,]
+      data <- foreach(id=unique(data[,"patient_id"]), .combine=rbind) %dopar% {
+        dat <- data[data[,"patient_id"]==id,]
         dat[,name] <- c(rep(NA, lag), dat[,var_name])[1:nrow(dat)]
         dat
       }
