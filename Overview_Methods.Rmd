@@ -16,8 +16,7 @@ This R Markdown document shows the usage of the package `cino1`.
 
 ```{r,  message = FALSE, warnings = FALSE  }
 # Install local package
-devtools::document()
-install.packages("~/Documents/Masterarbeit/Package/nofone/", repos = NULL, type="source")
+install.packages(".", repos = NULL, type="source")
 # load package
 library(cinof1)
 library(doParallel)
@@ -75,6 +74,7 @@ wilcox.nofone(simpatdat, exposure = exposure, outcome = outcome)
 
 
 ```{r adj.wash.in,  message = FALSE, warnings = FALSE  }
+
 outcome <- "Uncertain_Low_Back_Pain"
 exposure <- "treatment"
 variables <- c("Activity")

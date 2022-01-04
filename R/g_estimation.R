@@ -268,23 +268,13 @@ find_optimum_iterate <- function(data,
   psis <- seq(upper_bound_psi, lower_bound_psi, length = steps)
   betas <- c()
 
-  library(doParallel)
-
-  cores=detectCores()
-  cl <- makeForkCluster(cores[1]-1) #not to overload your computer
-  registerDoParallel(cl)
-
-
-  df <- foreach::foreach(i = c(1:length(psis)), .combine ="rbind") %dopar% {
+  df <- foreach::foreach(i = c(1:length(psis)), .combine ="rbind") %do% {
     psi <- psis[[i]]
     res <- calc_beta(data = data, psi = psi, outcome, exposure, confounder, id, corstr = corstr)
     beta <- res$beta
     se <- res$se
     c(psi, beta, se)
   }
-
-  # Stop Cluster
-  stopCluster(cl)
 
   colnames(df) <- c("PSI","Beta", "Std.Err")
   return(data.frame(df))
